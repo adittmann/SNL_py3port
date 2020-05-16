@@ -162,7 +162,7 @@ def plot_pdf_marginals(pdf, lims, gt=None, levels=(0.68, 0.95, 0.99), upper=Fals
     return fig
 
 
-def plot_hist_marginals(data, weights=None, lims=None, gt=None, upper=False, rasterized=False):
+def plot_hist_marginals(data, weights=None, lims=None, gt=None, upper=False, rasterized=False, figsize=None):
     """
     Plots marginal histograms and pairwise scatter plots of a dataset.
     """
@@ -172,7 +172,7 @@ def plot_hist_marginals(data, weights=None, lims=None, gt=None, upper=False, ras
 
     if data.ndim == 1:
 
-        fig, ax = plt.subplots(1, 1)
+        fig, ax = plt.subplots(1, 1, figsize=None)
         ax.hist(data, weights=weights, bins=n_bins, normed=True, rasterized=rasterized)
         ax.set_ylim([0.0, ax.get_ylim()[1]])
         ax.tick_params(axis='y', which='both', left=False, right=False, labelleft=False)
@@ -182,7 +182,7 @@ def plot_hist_marginals(data, weights=None, lims=None, gt=None, upper=False, ras
     else:
 
         n_dim = data.shape[1]
-        fig = plt.figure()
+        fig = plt.figure(figsize=None)
 
         if weights is None:
             col = 'k'

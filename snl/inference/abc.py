@@ -5,7 +5,7 @@ Implementations of ABC algorithms for likelihood-free simulation-based inference
 import os
 import sys
 import numpy as np
-import scipy.misc
+import scipy.special
 
 import snl.util as util
 
@@ -171,7 +171,7 @@ class SMC:
             n_sims += n_new_sims
 
             # calculate effective sample size
-            log_ess = -scipy.misc.logsumexp(2.0 * log_weights) - log_n_particles
+            log_ess = -scipy.special.logsumexp(2.0 * log_weights) - log_n_particles
 
             # if population is degenerate, resample particles
             if log_ess < log_ess_min:
@@ -247,12 +247,12 @@ class SMC:
 
             # calculate unnormalized weights
             log_kernel = -0.5 * np.sum(scipy.linalg.solve_triangular(std, (new_ps[i] - ps).T, lower=True) ** 2, axis=0)
-            new_log_weights[i] = self.prior.eval(new_ps[i], log=True) - scipy.misc.logsumexp(log_weights + log_kernel)
+            new_log_weights[i] = self.prior.eval(new_ps[i], log=True) - scipy.special.logsumexp(log_weights + log_kernel)
 
             logger.write('particle {0}\n'.format(i + 1))
 
         # normalize weights
-        new_log_weights -= scipy.misc.logsumexp(new_log_weights)
+        new_log_weights -= scipy.special.logsumexp(new_log_weights)
 
         return new_ps, new_log_weights, n_sims
 

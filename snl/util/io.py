@@ -12,7 +12,7 @@ def save(data, file):
     if dir:
         make_folder(dir)
 
-    with open(file + '.pkl', 'w') as f:
+    with open(file + '.pkl', 'wb') as f:
         pickle.dump(data, f)
 
 
@@ -21,7 +21,7 @@ def load(file):
     Loads data from file.
     """
 
-    with open(file + '.pkl', 'r') as f:
+    with open(file + '.pkl', 'rb') as f:
         data = pickle.load(f)
 
     if hasattr(data, 'reset_theano_functions'):

@@ -1,6 +1,6 @@
 import sys
 import numpy as np
-from scipy.misc import logsumexp
+from scipy.special import logsumexp
 from copy import deepcopy
 
 import snl.ml.trainers as trainers

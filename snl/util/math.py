@@ -1,5 +1,5 @@
 import numpy as np
-import scipy.misc
+import scipy.special
 import itertools
 
 
@@ -48,10 +48,10 @@ def logsoftmax(x):
     x = np.asarray(x)
 
     if x.ndim == 1:
-        return x - scipy.misc.logsumexp(x)
+        return x - scipy.special.logsumexp(x)
 
     elif x.ndim == 2:
-        return x - scipy.misc.logsumexp(x, axis=1)[:, np.newaxis]
+        return x - scipy.special.logsumexp(x, axis=1)[:, np.newaxis]
 
     else:
         raise ValueError('input must be either vector or matrix')
@@ -102,7 +102,7 @@ def importance_sample(target, proposal, n_samples, rng=np.random):
 
     xs = proposal.gen(n_samples, rng=rng)
     log_ws = target.eval(xs, log=True) - proposal.eval(xs, log=True)
-    log_ws -= scipy.misc.logsumexp(log_ws)
+    log_ws -= scipy.special.logsumexp(log_ws)
 
     return xs, log_ws
 
