@@ -415,8 +415,9 @@ class SequentialNeuralLikelihood:
                 proposal = sampler
 
             # run new batch of simulations
-            logger.write('simulating data... ')
-            ps, xs = simulators.sim_data(proposal.gen, self.sim_model, n_samples, rng=rng)
+            n_current_samples = self.get_n_current_samples(n_samples, i)
+            logger.write("simulating {} samples in round {}...".format(n_current_samples, i+1))
+            ps, xs = simulators.sim_data(proposal.gen, self.sim_model, n_current_samples, rng=rng)
             logger.write('done\n')
             self.all_ps.append(ps)
             self.all_xs.append(xs)
@@ -437,3 +438,10 @@ class SequentialNeuralLikelihood:
                 self.all_models.append(deepcopy(model))
 
         return model
+
+    def get_n_current_samples(self, n_samples, current_round):
+        if type(n_samples) == np.ndarray or type(n_samples) == list:
+            idx =  min(current_round, len(n_samples) - 1)
+            return n_samples[idx]
+        else:
+            return n_samples
