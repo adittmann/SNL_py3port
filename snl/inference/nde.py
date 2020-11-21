@@ -380,7 +380,7 @@ class SequentialNeuralLikelihood:
         self.all_xs = None
         self.all_models = None
 
-    def learn_likelihood(self, obs_xs, model, n_samples, n_rounds, train_on_all=True, thin=10, save_models=False, logger=sys.stdout, rng=np.random):
+    def learn_likelihood(self, obs_xs, model, n_samples, n_rounds, train_on_all=True, thin=10, save_models=False, logger=sys.stdout, rng=np.random, augment=None):
         """
         :param obs_xs: the observed data
         :param model: the model to train
@@ -396,6 +396,7 @@ class SequentialNeuralLikelihood:
         self.all_ps = []
         self.all_xs = []
         self.all_models = []
+        self.augment = augment
 
         log_posterior = lambda t: model.eval([t, obs_xs]) + self.prior.eval(t)
         sampler = mcmc.SliceSampler(self.prior.gen(), log_posterior, thin=thin)
@@ -419,6 +420,7 @@ class SequentialNeuralLikelihood:
             logger.write("simulating {} samples in round {}...".format(n_current_samples, i+1))
             ps, xs = simulators.sim_data(proposal.gen, self.sim_model, n_current_samples, rng=rng)
             logger.write('done\n')
+            ps, xs = self.augment_samples(ps, xs, logger)
             self.all_ps.append(ps)
             self.all_xs.append(xs)
 
@@ -445,3 +447,32 @@ class SequentialNeuralLikelihood:
             return n_samples[idx]
         else:
             return n_samples
+
+    def augment_samples(self, ps, xs, logger):
+        # here, we augment the training data to obtain additional training data
+        # currently, we only try out noise-based augmentation
+        if self.augment is None: return ps, xs
+        logger.write("Augmenting data...")
+
+        aug_fac = self.augment['fac']
+        aug_scale_func = self.augment['scale_func']
+
+        xs_aug = []
+        n, x_size = xs.shape
+        size = (aug_fac, x_size)
+        for p, x in zip(ps, xs):
+            scale = aug_scale_func(x)
+            x_aug = np.random.normal(loc=x, scale=scale, size=size)
+            xs_aug.append(x_aug)
+
+        xs_aug = np.array(xs_aug).reshape(-1, x_size)
+        ps_aug = np.repeat(ps, aug_fac, axis=0)
+
+        assert ps_aug.ndim == xs_aug.ndim == 2, "wrong shapes!: {}, {}".format(ps_aug.shape, xs_aug.shape)
+        assert ps_aug.shape[0] == xs_aug.shape[0] == n * aug_fac, "not enough samples!: {}, {}".format(ps_aug.shape, xs_aug.shape)
+        assert ps_aug.shape[1] == ps.shape[1], "ps_aug shape wrong!: {}, {}".format(ps_aug.shape, ps.shape)
+        assert xs_aug.shape[1] == xs.shape[1], "xs_aug shape wrong!: {}, {}".format(xs_aug.shape, xs.shape)
+        logger.write("done\n")
+        
+        return ps_aug, xs_aug
+

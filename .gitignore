@@ -18,4 +18,5 @@ snl/ml/models/__pycache__/
 snl/pdfs/__pycache__/
 snl/simulators/__pycache__/
 snl/util/__pycache__/
-
+build/
+dist/
